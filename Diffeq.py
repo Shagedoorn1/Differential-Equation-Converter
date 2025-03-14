@@ -56,6 +56,8 @@ class DiffEq:
                 This is a list that contains either an integer or 'A'.
                 This variable is assigned by calling the find_derivs function,
                 see documentation below for meaning of the elements.
+            self.order:
+                This is the order of the differential equation, the highest derivative in the equation.
             self.K:
                 This is a list that contains the numerical factors of the given
                 terms. With this the terms of the equation can be spliced into
@@ -68,8 +70,10 @@ class DiffEq:
         self.var = var
         self.t = sp.Symbol(self.var)
         self.func = func
-        self.y = sp.Function(self.func)(self.t)
+        self.y = sp.Function(self.func.lower())(self.t)
         self.derivatives = self.find_derivs()
+        orders = [i for i in self.derivatives if isinstance(i, int)]
+        self.order = max(orders, default=0)
         self.K = self.find_factors()
         self.function = sp.sympify(sum(self.make_equation())) #Sum and sympify all converted terms for the full expression
     
@@ -124,8 +128,10 @@ class DiffEq:
                 of every term of the differential equation.
         This function creates a list of sublists,
         where each sublist contains the numerical factors of a term.
-        If a character in a term is not numerical, like t or y,
+        If a character in a term is not numerical, like y,
         it is replaced with 1 to maintain multiplication consistency.
+        Except for t, which is added like a sympy symbol, otherwise this is
+        ignored is it is a factor of a term in the equation.
         Finally it creates the Ks list by taking the product of all the items
         in every sublist.
         """
@@ -139,7 +145,10 @@ class DiffEq:
                     f = int(char)
                     sub_l.append(f)
                 except ValueError:
-                    sub_l.append(1)
+                    if char == self.var:
+                        sub_l.append(sp.Symbol(self.var))
+                    else:
+                        sub_l.append(1)
             fact.append(sub_l)
             Ks = [math.prod(sub) for sub in fact]
         return Ks
