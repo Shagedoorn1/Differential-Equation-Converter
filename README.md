@@ -1,4 +1,4 @@
-# Differential-Equation-Converter
+# PyControl
 A series of python classes to quickly analyse control systems down from the governing differential equation.
 The classes allow for the equations to be entered easily and intuitively. 
 
