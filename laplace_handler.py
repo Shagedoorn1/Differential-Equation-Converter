@@ -2,50 +2,52 @@
 """
 Created on Fri Mar 14 18:58:04 2025
 
-@author: 23066776
+@author: SHagedoorn1
 """
 import sympy as sp
 from Diffeq import DiffEq
 from numpy import zeros
+sp.init_printing()
 
 class LaplaceHandler():
     """
     A class for correctly computing the laplace transform of a differentail equation.
+    
+    This class properly handles the transformation of an ordinary differential
+    equation (ODE) into the Laplace domain, ensuring the correct handling of
+    functions and initial conditions.
     """
     def __init__(self, equation, name, var='t'):
         """
-        Initialise the Laplace Handler.
-        Input arguments:
-            equation:
-                The equation which should be transformed
+        Initializes the LaplaceHandler class.
+        
+        Parameters:
+            equation (str):
+                The differential equation to be transformed
             name:
                 The name of the function in the equation, commonly 'y'
             var:
-                The variable of the function, commonly 't'
-        Output arguments:
-            self.t:
-                The variable of the function before transforming
-            self.s:
+                The independent variable of the equation, default 't'
+        
+        Attributes:
+            t (sympy Symbol):
+                The independent variable before transforming
+            s (sympy Symbol):
                 The complex-valued laplace variable
-            self.name:
-                The name of the function which is to be transformed
-            self.lap_name:
-                The name of the laplace transformed function, the capitalised
-                version of the function name
-            self.function:
-                The input string transformed to a sympy expression, see
-                Diffeq.py for details
-            self.equation:
-                The sympy expression.
-            self.initial_conds:
-                The initial conditions of the differential equations.
-                In control theory, these are assumed to be all 0, which means
-                that, the system is at rest before the input signal is turned
-                on. The transfer from the input signal alone is called the
-                forced transfer, as opposed to the natural transfer, arising
-                from the oposite case. The complete transfer would be the
-                sum of the two.
-            self.laplace_transform:
+            name (sympy Function):
+                The function to be transformed
+            lap_name (sympy Function):
+                The name of the laplace-transformed function,
+                capitalized version of 'name'.
+            function (DiffEq object):
+                A symbolic expression of the input equation (see Diffeq.py)
+            equation:
+                The differential equation converted to a sympy expression.
+            initial_conds (numpy array):
+                Initial conditions of the differential equations.
+                In control theory, these are assumed to be zero, meaning the
+                system is at rest before the input signal is applied.
+            laplace_transform (sympy expression):
                 The laplace transformed version of the input equation
         """
         self.t = sp.Symbol(var.lower())
@@ -64,8 +66,15 @@ class LaplaceHandler():
     
     def transform(self):
         """
-        Function that transforms the given equation. The laplace correspondence
-        is used because sympy can't correctly handle transforming an function.
+        This transforms the given equation into the Laplace domain.
+        
+        This function applies the Laplace transform to the input equation using
+        sympy's built in functions, while ensuring correct handling of initial
+        conditions and function substitution.
+        
+        Returns:
+            sympy expression:
+                The Laplace-transformed equation.
         """
         transformed = sp.laplace_transform(self.equation, self.t, self.s, noconds=True)
         transformed = sp.laplace_correspondence(transformed, {self.name: self.lap_name})
@@ -74,10 +83,14 @@ class LaplaceHandler():
     
     def __str__(self):
         """
-        Returns the laplace transformed equation when an instance of the class
-        is printed.
+        Returns the Laplace-transformed equation as a formatted string.
+        
+        When an instance of this class is printed, the transformed equation is
+        displayed in a readable format
         """
-        return f"{self.laplace_transform}"
+        sp.pretty_print(f"{self.laplace_transform}")
+        return ""
 if __name__ == '__main__':
     string = "y'''+y''+y'+y+sin(t)"
     a = LaplaceHandler(string, 'y')
+    print(a)
