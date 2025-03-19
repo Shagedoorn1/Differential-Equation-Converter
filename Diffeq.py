@@ -1,96 +1,204 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar 14 18:58:04 2025
+Created on Mon Mar 10 10:19:48 2025
 
 @author: SHagedoorn1
 """
+
 import sympy as sp
-from Diffeq import DiffEq
-from numpy import zeros
+import math
 sp.init_printing()
 
-class LaplaceHandler():
+class DiffEq:
     """
-    A class for correctly computing the laplace transform of a differentail equation.
+    A class for handling ordinary differential equations (ODEs).
+    This class allows users to enter a differential equation in Lagrange
+    notation, the way it would be written on paper, and converts it into a
+    symbolic sympy expression.
     
-    This class properly handles the transformation of an ordinary differential
-    equation (ODE) into the Laplace domain, ensuring the correct handling of
-    functions and initial conditions.
-    """
-    def __init__(self, equation, name, var='t'):
+    Note:
+        This class only supports non-mixed ODEs.
+        If a mixed ODE is required, multiple instances of this class should
+        be created.
+    """  
+    def __init__(self, eq, func, var='t'):
         """
-        Initializes the LaplaceHandler class.
+        Initializes the DiffEq class.
         
         Parameters:
-            equation (str):
-                The differential equation to be transformed
-            name:
-                The name of the function in the equation, commonly 'y'
-            var:
-                The independent variable of the equation, default 't'
+            eq (str):
+                The differential equation as a string.
+                For correct conversion, follow these rules:
+                    1. The equation should be enclosed in double quotes.
+                    2. Use an asterisk (*) for multiplication.
+                    3. For subtraction, use '+-' 
+            func (str):
+                The name of the function in the differential equation.
+                Example: In "y' = 5*y", y is the name.
+            var (str):
+                The independent variable with respect to which differentiation
+                occurs, default t.
         
         Attributes:
+            eq:
+                The input equation with whitespaces removed
+            terms (list):
+                A list containing individual terms of the equation.
+                Terms are separated by the '+' operator.
+            var (str):
+                The independent variable.
             t (sympy Symbol):
-                The independent variable before transforming
-            s (sympy Symbol):
-                The complex-valued laplace variable
-            name (sympy Function):
-                The function to be transformed
-            lap_name (sympy Function):
-                The name of the laplace-transformed function,
-                capitalized version of 'name'.
-            function (DiffEq object):
-                A symbolic expression of the input equation (see Diffeq.py)
-            equation:
-                The differential equation converted to a sympy expression.
-            initial_conds (numpy array):
-                Initial conditions of the differential equations.
-                In control theory, these are assumed to be zero, meaning the
-                system is at rest before the input signal is applied.
-            laplace_transform (sympy expression):
-                The laplace transformed version of the input equation
+                Symbolic representation of the independent variable.
+            func (str):
+                The function name.
+            y (sympy Function):
+                Symbolic representation of the function dependend on 't'.
+            derivatives (list):
+                A list indicating the order of derivatives in each term.
+                See 'find_derivs()' for details.
+            order (int):
+                The highest order derivative in the equation
+            K (list):
+                A list that containing the numerical coefficients of each term.
+            function (sympy expression):
+                The final converted differential equation as a sympy expression.
         """
-        self.t = sp.Symbol(var.lower())
-        self.s = sp.Symbol('s')
-        
-        self.name = sp.Function(name.lower())
-        self.lap_name = sp.Function(name.upper())
-        self.function = DiffEq(equation, name, var)
-        self.equation = self.function.function
-        
-        if self.function.order == 0:
-            self.initial_conds = [0]
-        else:
-            self.initial_conds = zeros(self.function.order)
-        self.laplace_transform = self.transform()
+        self.eq = eq.replace(" ", "")
+        self.terms = self.sort_eq()
+        self.var = var
+        self.t = sp.Symbol(self.var)
+        self.func = func
+        self.y = sp.Function(self.func.lower())(self.t)
+        self.derivatives = self.find_derivs()
+        orders = [i for i in self.derivatives if isinstance(i, int)]
+        self.order = max(orders, default=0)
+        self.K = self.find_factors()
+        self.function = sp.sympify(sum(self.make_equation())) #Sum and sympify all converted terms for the full expression
     
-    def transform(self):
+    def sort_eq(self):
         """
-        This transforms the given equation into the Laplace domain.
+        Splits the equation into individual terms.
         
-        This function applies the Laplace transform to the input equation using
-        sympy's built in functions, while ensuring correct handling of initial
-        conditions and function substitution.
+        The equation is split using the "+" operator.
         
         Returns:
-            sympy expression:
-                The Laplace-transformed equation.
+            list:
+                A list containing the seperated terms of the equation.
         """
-        transformed = sp.laplace_transform(self.equation, self.t, self.s, noconds=True)
-        transformed = sp.laplace_correspondence(transformed, {self.name: self.lap_name})
-        transformed = sp.laplace_initial_conds(transformed, self.t, {self.name: self.initial_conds})
-        return transformed
+        terms = self.eq.split("+")      #Split at the + operator
+        return terms
+    
+    def find_derivs(self):
+        """
+        Identifies the order of the differentiation of each term in the
+        equation.
+        
+        Creates a list where each elements represents the derivative order or
+        presence of the function in the term.
+        
+        Returns:
+            list:
+                A list where each element can be:
+                    - A nonzero integer: Represents the order of differentiation.
+                    - The string 'A': Indicates the presence of the function
+                    name
+                    - zero (0): Indicates that the term does not contain the
+                    function.
+        
+        Raises:
+            VauleError:
+                If a term contains a prime (`'`) but not the function name.
+                This suggests an invalid derivative, likely due to a typo.
+        
+        """
+        prims = []
+        for n in self.terms:
+            m = n.count("'")
+            if m != 0 and self.func in n:
+                d = m
+            elif m != 0 and self.func not in n:
+                raise ValueError
+            elif m == 0 and self.func in n:
+                d = 'A'
+            elif m == 0 and self.func not in n:
+                d = 0
+            prims.append(d)
+        return prims
+    
+    def find_factors(self):
+        """
+        Extract the numerical factors from each term in the equation.
+        
+        
+        Returns:
+            list:
+                A list where each element represents the product of numerical
+                factors in a corresponding term of the equation.
+        
+        Details:
+            - If a character in a term is not a number, t or y, it is replaced
+            with 1 to maintain multiplication consistency.
+        """
+        fact = []
+        for term in self.terms:
+            i = term.split('*')
+            
+            sub_l = []
+            for char in i:
+                try:
+                    f = int(char)
+                    sub_l.append(f)
+                except ValueError:
+                    if char == self.var:
+                        sub_l.append(sp.Symbol(self.var))
+                    else:
+                        sub_l.append(1)
+            fact.append(sub_l)
+            Ks = [math.prod(sub) for sub in fact]
+        return Ks
+    
+    def make_equation(self):
+        """
+        Converts the equation into a symbolic sympy expression.
+        
+        Returns:
+            list:
+                A list containing the sympy representation of
+                each term in 'self.terms'.
+        
+        Details:
+            -Iterates over 'self.K', 'self.derivatives' and 'self.terms' in
+            parallel.
+            -Converts each term into a properly formatted sympy expression
+            -The final step to forming the full expression
+            happens in '__init__'.
+        """
+        equ = []
+        for K, Y, T in zip(self.K, self.derivatives, self.terms):
+            if Y == 'A':
+                k = K
+                ter = self.y
+            elif int(Y) > 0:
+                k = K
+                ter = sp.diff(self.y, self.t, Y)
+            elif Y == 0:
+                k = 1
+                ter = T
+            equ_term = sp.sympify(k)*sp.sympify(ter)
+            equ.append(equ_term)
+        return equ
     
     def __str__(self):
         """
-        Returns the Laplace-transformed equation as a formatted string.
+        Returns the converted differential equation as a string.
         
-        When an instance of this class is printed, the transformed equation is
-        displayed in a readable format
+        When an instance of this class is printed, it displays the sympy
+        expression of the equation.
         """
-        sp.pretty_print(f"{self.laplace_transform}")
-        return ""
+        return f'{self.function}'
+            
+                
 if __name__ == '__main__':
-    string = "y'''+y''+y'+y+sin(t)"
-    a = LaplaceHandler(string, 'y')
+    string = "-1*t*y"
+    a = DiffEq(string, 'y')
     print(a)
