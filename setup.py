@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-  name="PyControl",
-  version="0.1.0",
+  name="pysyscontrol",
+  version="1.0.0",
   author="Shagedoorn1",
   author_email="svenhagedoorn@gmail.com",
   description="A Python package for Control Systems Analysis",
@@ -12,7 +12,7 @@ setup(
   packages=find_packages(),
   classifiers=[
     "Programming Language :: Python :: 3",
-    "Lisence :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
   ],
   python_requires=">=3.12"
