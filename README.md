@@ -1,4 +1,4 @@
-# PyControl
+# PySysControl
 A series of python classes to quickly analyse control systems down from the governing differential equation.
 The classes allow for the equations to be entered easily and intuitively. 
 
@@ -12,3 +12,4 @@ The laplace_handler transforms the given equation from whatever domain it is def
 to the complex valued s-domain.
 
 The transfer_function class converts the given differential equations to a transfer function in the s-domain, which can be switched to the w-domain.
+
