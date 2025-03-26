@@ -1,7 +1,7 @@
 # Changelog
 
 ## [1.1.3] - 2025-03-20
-### First correctly functioning release
+- First correctly functioning release
 
 ## [1.2.0] - 2025-03-26
 ### Added
