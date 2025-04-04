@@ -18,6 +18,7 @@
   -- Euler
   -- Runge Kutta 2
   -- Runge Kutta 4
+  --
 ## Changed
 - Diffeq now supports exponents.
 ### How to update
