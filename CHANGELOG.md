@@ -12,6 +12,14 @@
 ## [1.2.5] - 2025-03-26
 ### Fixed
 - Corrected a typo in pyproject.toml
+## [1.3.0] - 2025-04-04
+## Added
+- Solver class including:
+  -- Euler
+  -- Runge Kutta 2
+  -- Runge Kutta 4
+## Changed
+- Diffeq now supports exponents.
 ### How to update
 Run the folowing command to update:
-- pip install pysyscontrol --upgrade
+- pip install --upgrade pysyscontrol
