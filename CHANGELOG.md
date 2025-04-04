@@ -15,10 +15,9 @@
 ## [1.3.0] - 2025-04-04
 ## Added
 - Solver class including:
-  -- Euler
-  -- Runge Kutta 2
-  -- Runge Kutta 4
-  --
+  - Euler
+  - Runge Kutta 2
+  - Runge Kutta 4
 ## Changed
 - Diffeq now supports exponents.
 ### How to update
