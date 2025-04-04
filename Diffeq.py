@@ -61,7 +61,7 @@ class DiffEq:
             K (list):
                 A list that contains the numerical coefficients of each term.
             E (list):
-                A list that contains the numerical exponents of each term
+                A list that contains the numerical exponents of each term.
             function (sympy expression):
                 The final converted differential equation as a sympy expression.
         """
