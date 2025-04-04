@@ -2,7 +2,7 @@
 """
 Created on Mon Mar 10 10:19:48 2025
 
-@author: SHagedoorn1
+@author: Shagedoorn1
 """
 
 import sympy as sp
@@ -59,7 +59,9 @@ class DiffEq:
             order (int):
                 The highest order derivative in the equation
             K (list):
-                A list that containing the numerical coefficients of each term.
+                A list that contains the numerical coefficients of each term.
+            E (list):
+                A list that contains the numerical exponents of each term
             function (sympy expression):
                 The final converted differential equation as a sympy expression.
         """
@@ -72,7 +74,7 @@ class DiffEq:
         self.derivatives = self.find_derivs()
         orders = [i for i in self.derivatives if isinstance(i, int)]
         self.order = max(orders, default=0)
-        self.K = self.find_factors()
+        self.K, self.E = self.find_factors()
         self.function = sp.sympify(sum(self.make_equation())) #Sum and sympify all converted terms for the full expression
     
     def sort_eq(self):
@@ -131,20 +133,31 @@ class DiffEq:
         
         
         Returns:
-            list:
+            Ks (list):
                 A list where each element represents the product of numerical
                 factors in a corresponding term of the equation.
-        
+            ex (list)
+                A list where eacht element represents the product of numerical
+                exponents in a corresponding term of the equation.
         Details:
             - If a character in a term is not a number, t or y, it is replaced
             with 1 to maintain multiplication consistency.
         """
         fact = []
+        exps = []
         for term in self.terms:
             i = term.split('*')
-            
             sub_l = []
+            exp = []
             for char in i:
+                if "^" in char:
+                    j = char.split("^")
+                    for m in j:
+                        try:
+                            e = int(m)
+                            exp.append(e)
+                        except ValueError:
+                            exp.append(1)
                 try:
                     f = int(char)
                     sub_l.append(f)
@@ -154,9 +167,10 @@ class DiffEq:
                     else:
                         sub_l.append(1)
             fact.append(sub_l)
+            exps.append(exp)
             Ks = [math.prod(sub) for sub in fact]
-        return Ks
-    
+            es = [math.prod(sub) for sub in exps]
+        return Ks, es
     def make_equation(self):
         """
         Converts the equation into a symbolic sympy expression.
@@ -174,19 +188,26 @@ class DiffEq:
             happens in '__init__'.
         """
         equ = []
-        for K, Y, T in zip(self.K, self.derivatives, self.terms):
+        for K, Y, T, E in zip(self.K, self.derivatives, self.terms, self.E):
             if Y == 'A':
-                k = K
-                ter = self.y
+                term = K * self.y**E
             elif int(Y) > 0:
-                k = K
-                ter = sp.diff(self.y, self.t, Y)
+                term = K * sp.diff(self.y, self.t, Y)
             elif Y == 0:
-                k = 1
-                ter = T
-            equ_term = sp.sympify(k)*sp.sympify(ter)
-            equ.append(equ_term)
+                term = K * self.t**E
+            equ.append(sp.sympify(term))
         return equ
+    
+    def isolate(self):
+        eq = sp.solve(self.function, sp.diff(self.y, self.t, self.order))[0]
+        return sp.lambdify((self.t, self.y), eq)
+    
+    def initial_conds(self):
+        conds = []
+        for i in range(self.order):
+            c = input(f"Initial value for {i}th oder derivative of {self.func}: ")
+            conds.append(c)
+        return conds
     
     def __str__(self):
         """
@@ -199,6 +220,6 @@ class DiffEq:
             
                 
 if __name__ == '__main__':
-    string = "-1*t*y"
+    string = "y^3+t^2"
     a = DiffEq(string, 'y')
     print(a)
