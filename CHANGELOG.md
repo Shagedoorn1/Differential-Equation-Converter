@@ -9,17 +9,23 @@
 - Nyquist diagram
 ### Changed
 - Added a dark_mode option for the plots
+
 ## [1.2.5] - 2025-03-26
 ### Fixed
 - Corrected a typo in pyproject.toml
+
 ## [1.3.0] - 2025-04-04
-## Added
+### Added
 - Solver class including:
   - Euler
   - Runge Kutta 2
   - Runge Kutta 4
-## Changed
+### Changed
 - Diffeq now supports exponents.
-### How to update
+
+## [1.3.1] - 2025-04-06
+### Fixed
+- Fixed error in DiffEq.find_factors() that incorrectly turned "t" into "t**2"
+## How to update
 Run the folowing command to update:
 - pip install --upgrade pysyscontrol
