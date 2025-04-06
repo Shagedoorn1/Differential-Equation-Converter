@@ -59,9 +59,7 @@ class DiffEq:
             order (int):
                 The highest order derivative in the equation
             K (list):
-                A list that contains the numerical coefficients of each term.
-            E (list):
-                A list that contains the numerical exponents of each term.
+                A list that containing the numerical coefficients of each term.
             function (sympy expression):
                 The final converted differential equation as a sympy expression.
         """
@@ -133,12 +131,10 @@ class DiffEq:
         
         
         Returns:
-            Ks (list):
+            list:
                 A list where each element represents the product of numerical
                 factors in a corresponding term of the equation.
-            ex (list)
-                A list where eacht element represents the product of numerical
-                exponents in a corresponding term of the equation.
+        
         Details:
             - If a character in a term is not a number, t or y, it is replaced
             with 1 to maintain multiplication consistency.
@@ -163,7 +159,7 @@ class DiffEq:
                     sub_l.append(f)
                 except ValueError:
                     if char == self.var:
-                        sub_l.append(sp.Symbol(self.var))
+                        sub_l.append(1)
                     else:
                         sub_l.append(1)
             fact.append(sub_l)
@@ -192,7 +188,7 @@ class DiffEq:
             if Y == 'A':
                 term = K * self.y**E
             elif int(Y) > 0:
-                term = K * sp.diff(self.y, self.t, Y)
+                term = K * sp.diff(self.y, self.t, Y)**E
             elif Y == 0:
                 term = K * self.t**E
             equ.append(sp.sympify(term))
@@ -220,6 +216,6 @@ class DiffEq:
             
                 
 if __name__ == '__main__':
-    string = "y^3+t^2"
+    string = "t^3"
     a = DiffEq(string, 'y')
-    print(a)
+    print(a.function)
