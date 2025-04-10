@@ -22,10 +22,13 @@
   - Runge Kutta 4
 ### Changed
 - Diffeq now supports exponents.
-
+Also, PySysControl now officially has requirements
 ## [1.3.1] - 2025-04-06
 ### Fixed
 - Fixed error in DiffEq.find_factors() that incorrectly turned "t" into "t**2"
+## [1.4.0] - 2025-04-10
+### Added
+- PDiffEq. DiffEqs brother for PDEs
 ## How to update
 Run the folowing command to update:
 - pip install --upgrade pysyscontrol
