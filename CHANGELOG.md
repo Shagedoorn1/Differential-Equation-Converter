@@ -29,6 +29,9 @@ Also, PySysControl now officially has requirements
 ## [1.4.0] - 2025-04-10
 ### Added
 - PDiffEq. DiffEqs brother for PDEs
+## [1.5.0] - 2025-04-16
+### Added
+- TransferFunction can now compute the closed loop transfer function. Which is used for the nyquist plot
 ## How to update
 Run the folowing command to update:
 - pip install --upgrade pysyscontrol
